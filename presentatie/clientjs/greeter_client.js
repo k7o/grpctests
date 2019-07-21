@@ -16,24 +16,31 @@
  *
  */
 
-var messages = require('../generated/helloreply');
-var messages = require('../generated/hellorequest');
-
+var PROTO_PATH = __dirname + '/../server/Protos/Greet.proto';
 var grpc = require('grpc');
+var protoLoader = require('@grpc/proto-loader');
+var packageDefinition = protoLoader.loadSync(
+  PROTO_PATH,
+  {keepCase: true,
+   longs: String,
+   enums: String,
+   defaults: true,
+   oneofs: true
+  });
+var hello_proto = grpc.loadPackageDefinition(packageDefinition).Greet;
 
 function main() {
-  var client = new services.GreeterClient('localhost:50051',
-                                          grpc.credentials.createInsecure());
-  var request = new messages.HelloRequest();
+  
+  var client = new hello_proto.Greeter('localhost:50051', grpc.credentials.createInsecure());
+
   var user;
   if (process.argv.length >= 3) {
     user = process.argv[2];
   } else {
     user = 'world';
   }
-  request.setName(user);
-  client.sayHello(request, function(err, response) {
-    console.log('Greeting:', response.getMessage());
+  client.SayHello({name:user}, function(err, response) {
+    console.log('Greeting:', response.message);
   });
 }
 

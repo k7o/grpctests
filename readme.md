@@ -12,7 +12,7 @@ C:\Users\Eric\.nuget\packages\grpc.tools\1.22.0\tools\windows_x64\protoc.exe --p
 
 Server
 
-dotnet new grpc -o Server
+dotnet new grpc -o server
 
 
 Client

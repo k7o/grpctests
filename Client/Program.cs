@@ -18,25 +18,22 @@ namespace Client
             AppContext.SetSwitch(
               "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport",
               true);
-            
-            var cacert = File.ReadAllText($@"Certificates\ca.crt");
-            var cert = File.ReadAllText($@"Certificates\client.crt");
-            var key = File.ReadAllText($@"Certificates\client.key");
 
-            var keypair = new KeyCertificatePair(cert, key);
-            var sslCredentials = new SslCredentials(cacert, keypair);
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = ((a, b, c, d) => true);
+            /*
+            handler.ClientCertificates.Add(
+                new System.Security.Cryptography.X509Certificates.X509Certificate2("D:/Projects/grpctests/Development/Certificates/grpctests.pfx", "welkom01")
+                );
+                */
+            var httpClient = new HttpClient(handler);
 
-            
-            var c = new Channel($"localhost", Port, sslCredentials);
-            
-            var httpClient = new HttpClient();
-            
-            httpClient.BaseAddress = new Uri($"http://localhost:{Port}");
-            var client = new Fucker.FuckerClient(c);
-            
+            httpClient.BaseAddress = new Uri($"https://localhost:{Port}");
+            var client = GrpcClient.Create<Fucker.FuckerClient>(httpClient);
+
             //var client = GrpcClient.Create<Fucker.FuckerClient>(httpClient);
             var reply = await client.SayHelloAsync(
-                              new HelloRequest { Name = "GreeterClient" });
+                              new HelloRequest { Name = "GreeterClient" } );
 
             Console.WriteLine("Greeting: " + reply.Message);
             Console.WriteLine("Press any key to exit...");
